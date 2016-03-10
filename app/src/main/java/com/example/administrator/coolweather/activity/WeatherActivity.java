@@ -13,6 +13,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.example.administrator.coolweather.R;
+import com.example.administrator.coolweather.service.AutoUpdateService;
 import com.example.administrator.coolweather.util.HttpCallbackListener;
 import com.example.administrator.coolweather.util.HttpUtil;
 import com.example.administrator.coolweather.util.Utility;
@@ -85,9 +86,10 @@ public class WeatherActivity extends Activity implements View.OnClickListener {
             weatherInfolayout.setVisibility(View.INVISIBLE);
             cityNameTv.setVisibility(View.INVISIBLE);
             queryWeatherCode(countyCode);
-        } else {
-            showWeather();
         }
+//        else {
+//            showWeather();
+//        }
     }
 
     private void initView() {
@@ -170,6 +172,8 @@ public class WeatherActivity extends Activity implements View.OnClickListener {
         publishTimeTv.setText("今天" + prefs.getString("publish_time", "") + "发布");
         weatherInfolayout.setVisibility(View.VISIBLE);
         cityNameTv.setVisibility(View.VISIBLE);
+        Intent intent = new Intent(this, AutoUpdateService.class);
+        startService(intent);
 
     }
 
