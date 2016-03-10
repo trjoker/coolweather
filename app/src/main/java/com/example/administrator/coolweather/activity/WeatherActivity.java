@@ -1,12 +1,14 @@
 package com.example.administrator.coolweather.activity;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.Window;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -18,7 +20,7 @@ import com.example.administrator.coolweather.util.Utility;
 /**
  * Created by Ryan on 2016/3/9 0009.
  */
-public class WeatherActivity extends Activity {
+public class WeatherActivity extends Activity implements View.OnClickListener {
     private LinearLayout weatherInfolayout;
 
     /**
@@ -51,13 +53,29 @@ public class WeatherActivity extends Activity {
      */
     private TextView currentDateTv;
 
+    /**
+     * 切换城市按钮
+     */
+    private Button switchBtn;
+
+    /**
+     * 刷新按钮
+     */
+    private Button refreshBtn;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.weather_layout);
         initView();
+        initAction();
         queryWeather();
+    }
+
+    private void initAction() {
+        switchBtn.setOnClickListener(this);
+        refreshBtn.setOnClickListener(this);
     }
 
     private void queryWeather() {
@@ -67,8 +85,8 @@ public class WeatherActivity extends Activity {
             weatherInfolayout.setVisibility(View.INVISIBLE);
             cityNameTv.setVisibility(View.INVISIBLE);
             queryWeatherCode(countyCode);
-        }else{
-           showWeather();
+        } else {
+            showWeather();
         }
     }
 
@@ -80,6 +98,8 @@ public class WeatherActivity extends Activity {
         temp1Tv = (TextView) findViewById(R.id.tv_temp1);
         temp2Tv = (TextView) findViewById(R.id.tv_temp2);
         currentDateTv = (TextView) findViewById(R.id.tv_current_date);
+        switchBtn = (Button) findViewById(R.id.btn_switch);
+        refreshBtn = (Button) findViewById(R.id.btn_refresh);
     }
 
     /**
@@ -147,11 +167,33 @@ public class WeatherActivity extends Activity {
         weatherDespTv.setText(prefs.getString("weather_desp", ""));
         publishTimeTv.setText(prefs.getString("publish_time", ""));
         currentDateTv.setText(prefs.getString("current_date", ""));
-        publishTimeTv.setText("今天"+prefs.getString("publish_time","")+"发布");
+        publishTimeTv.setText("今天" + prefs.getString("publish_time", "") + "发布");
         weatherInfolayout.setVisibility(View.VISIBLE);
         cityNameTv.setVisibility(View.VISIBLE);
 
     }
 
 
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.btn_switch:
+                Intent intent = new Intent(this, ChooseAreaActivity.class);
+                intent.putExtra("from_weather_activity", true);
+                startActivity(intent);
+                finish();
+                break;
+            case R.id.btn_refresh:
+                publishTimeTv.setText("同步中...");
+                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+                String weatherCode = prefs.getString("weather_code", "");
+                if (!TextUtils.isEmpty(weatherCode)) {
+                    queryWeatherInfo(weatherCode);
+                }
+                break;
+            default:
+                break;
+
+        }
+    }
 }
