@@ -2,7 +2,10 @@ package com.example.administrator.coolweather.activity;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.Window;
@@ -68,8 +71,19 @@ public class ChooseAreaActivity extends Activity implements AdapterView.OnItemCl
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.choose_area);
+        initSelected();
         initView();
         initList();
+    }
+
+    private void initSelected() {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        if (prefs.getBoolean("city_selected", false)) {
+            Intent intent = new Intent(ChooseAreaActivity.this, WeatherActivity.class);
+            startActivity(intent);
+            finish();
+            return;
+        }
     }
 
     private void initList() {
@@ -93,6 +107,13 @@ public class ChooseAreaActivity extends Activity implements AdapterView.OnItemCl
         } else if (currentLevel == LEVEL_CITY) {
             selectedCity = cityList.get(position);
             queryCounties();
+        } else if (currentLevel == LEVEL_COUNTY) {
+            String coutyCode = countyList.get(position).getCountyCode();
+            Intent intent = new Intent(ChooseAreaActivity.this, WeatherActivity.class);
+            intent.putExtra("county_code", coutyCode);
+            startActivity(intent);
+            finish();
+
         }
     }
 
@@ -107,24 +128,24 @@ public class ChooseAreaActivity extends Activity implements AdapterView.OnItemCl
             listView.setSelection(0);
             titleTv.setText(selectedCity.getCityName());
             currentLevel = LEVEL_COUNTY;
-        }else{
-            queryFromServer(selectedCity.getCityCode(),"county");
+        } else {
+            queryFromServer(selectedCity.getCityCode(), "county");
         }
     }
 
     private void queryCities() {
         cityList = coolWeatherDB.loadCities(selectedProvince.getId());
-        if(cityList.size()>0){
+        if (cityList.size() > 0) {
             dataList.clear();
-            for(City city:cityList){
+            for (City city : cityList) {
                 dataList.add(city.getCityName());
             }
             adapter.notifyDataSetChanged();
             listView.setSelection(0);
             titleTv.setText(selectedProvince.getProvinceName());
-            currentLevel =LEVEL_CITY;
-        }else{
-            queryFromServer(selectedProvince.getProvinceCode(),"city");
+            currentLevel = LEVEL_CITY;
+        } else {
+            queryFromServer(selectedProvince.getProvinceCode(), "city");
         }
 
     }
